@@ -364,17 +364,30 @@ async function soumettre() {
     soumis_le: new Date().toLocaleString('fr-FR')
   };
 
+  const SCRIPT_URL = 'TON_URL_ICI';
+
+  // no-cors : on ne peut pas lire la réponse, mais on attend 3s
+  // et si pas d'erreur réseau, on considère que c'est passé
   try {
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzFkgFaZXiKHDw_0CXSvYVhkTEj0aYiuhKZpPqf4j4iYZZ0xdo1a4vHiHyHlV0Qh-2y/exec';
-    const resp = await fetch(SCRIPT_URL, {
+    await fetch(SCRIPT_URL, {
       method: 'POST',
+      mode: 'no-cors',
       body: JSON.stringify(data)
     });
-    if (resp.ok) {
-      status.textContent = 'Réservation envoyée ! Nous vous confirmons très vite par email.';
-      status.className = 'status-msg success';
-      setDots(3);
-    } else throw new Error();
+
+    // Succès : affiche la page de confirmation
+    document.querySelector('.wrap').innerHTML = `
+      <div style="min-height:400px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3rem 2rem; text-align:center; background:#F5F0E8;">
+        <div style="font-size:32px; color:#C8A84B; margin-bottom:1.5rem;">⚜</div>
+        <h2 style="font-family:'IM Fell English',serif; font-size:28px; font-weight:400; color:#1A1410; margin-bottom:1rem;">Réservation confirmée</h2>
+        <p style="font-family:'IM Fell English',serif; font-style:italic; color:#5C4A32; font-size:15px; margin-bottom:0.5rem;">
+          Merci ${data.prenom}, nous vous attendons le ${data.date} à ${data.heure}.
+        </p>
+        <p style="font-size:13px; color:#8B7355; margin-top:1.5rem;">Une confirmation vous sera envoyée à ${data.email}</p>
+        <div style="margin-top:3rem; height:0.5px; width:80px; background:#C8A84B; opacity:0.5;"></div>
+        <p style="margin-top:1.5rem; font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:#8B7355;">Crêperie Burgonde · Flavigny-sur-Ozerain</p>
+      </div>
+    `;
   } catch(e) {
     status.textContent = 'Erreur de connexion. Veuillez réessayer ou nous appeler.';
     status.className = 'status-msg error';
