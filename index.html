@@ -197,8 +197,8 @@
       display: none;
     }
 
-    /* CONFIRMATION PAGE */
-    .confirmation {
+    /* CENTERED PAGES (confirmation + complet) */
+    .centered-page {
       display: none;
       flex-direction: column;
       align-items: center;
@@ -209,16 +209,16 @@
       background: #F5F0E8;
     }
 
-    .confirmation.visible { display: flex; }
+    .centered-page.visible { display: flex; }
 
-    .confirmation-ornament {
+    .centered-ornament {
       font-size: 36px;
       color: #C8A84B;
       margin-bottom: 2rem;
       font-family: 'IM Fell English', serif;
     }
 
-    .confirmation h2 {
+    .centered-page h2 {
       font-family: 'IM Fell English', serif;
       font-size: 30px;
       font-weight: 400;
@@ -226,23 +226,23 @@
       margin-bottom: 1.25rem;
     }
 
-    .confirmation-msg {
+    .centered-msg {
       font-family: 'IM Fell English', serif;
       font-style: italic;
-      font-size: 16px;
+      font-size: 15px;
       color: #5C4A32;
       line-height: 1.7;
-      margin-bottom: 0.75rem;
+      max-width: 340px;
     }
 
-    .confirmation-email {
+    .centered-sub {
       font-size: 12px;
       color: #8B7355;
-      margin-top: 0.5rem;
+      margin-top: 0.75rem;
       letter-spacing: 0.05em;
     }
 
-    .confirmation-sep {
+    .centered-sep {
       width: 60px;
       height: 0.5px;
       background: #C8A84B;
@@ -250,7 +250,7 @@
       margin: 2.5rem auto;
     }
 
-    .confirmation-footer {
+    .centered-footer {
       font-size: 10px;
       letter-spacing: 0.2em;
       text-transform: uppercase;
@@ -285,6 +285,32 @@
       letter-spacing: 0.08em;
     }
 
+    /* LOADER */
+    .loader {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #F5F0E8;
+    }
+
+    .loader-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #C8A84B;
+      margin: 0 4px;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    .loader-dot:nth-child(2) { animation-delay: 0.2s; }
+    .loader-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.2; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1); }
+    }
+
     /* RESPONSIVE */
     @media (max-width: 480px) {
       .form-grid { grid-template-columns: 1fr; }
@@ -297,8 +323,15 @@
 
 <div class="page">
 
+  <!-- LOADER -->
+  <div class="loader" id="loader">
+    <div class="loader-dot"></div>
+    <div class="loader-dot"></div>
+    <div class="loader-dot"></div>
+  </div>
+
   <!-- FORMULAIRE -->
-  <div id="form-page">
+  <div id="form-page" style="display:none;">
     <div class="hero">
       <div class="hero-eyebrow">Flavigny-sur-Ozerain &middot; Bourgogne</div>
       <h1>Crêperie<br>Burgonde</h1>
@@ -388,22 +421,55 @@
   </div>
 
   <!-- PAGE CONFIRMATION -->
-  <div class="confirmation" id="confirmation-page">
-    <div class="confirmation-ornament">⚜</div>
+  <div class="centered-page" id="confirmation-page">
+    <div class="centered-ornament">⚜</div>
     <h2>Réservation confirmée</h2>
-    <p class="confirmation-msg" id="conf-msg">
-      Merci, nous vous attendons avec plaisir.
-    </p>
-    <p class="confirmation-email" id="conf-email"></p>
-    <div class="confirmation-sep"></div>
-    <div class="confirmation-footer">Crêperie Burgonde &middot; Flavigny-sur-Ozerain</div>
+    <p class="centered-msg" id="conf-msg"></p>
+    <p class="centered-sub" id="conf-email"></p>
+    <div class="centered-sep"></div>
+    <div class="centered-footer">Crêperie Burgonde &middot; Flavigny-sur-Ozerain</div>
     <button class="btn-retour" onclick="retour()">Faire une autre réservation</button>
+  </div>
+
+  <!-- PAGE COMPLET -->
+  <div class="centered-page" id="complet-page">
+    <div class="centered-ornament">⚜</div>
+    <h2>Réservations complètes</h2>
+    <p class="centered-msg">
+      Nous sommes complets pour le moment.<br>N'hésitez pas à nous contacter directement.
+    </p>
+    <div class="centered-sep"></div>
+    <div class="centered-footer">Crêperie Burgonde &middot; Flavigny-sur-Ozerain</div>
   </div>
 
 </div>
 
 <script>
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzFkgFaZXiKHDw_0CXSvYVhkTEj0aYiuhKZpPqf4j4iYZZ0xdo1a4vHiHyHlV0Qh-2y/exec';
+  const SCRIPT_URL = 'VOTRE_URL_GOOGLE_APPS_SCRIPT_ICI';
+
+  // Vérifier le statut ouvert/fermé au chargement
+  async function verifierStatut() {
+    try {
+      const resp = await fetch(SCRIPT_URL);
+      const statut = await resp.text();
+      document.getElementById('loader').style.display = 'none';
+      if (statut.trim() === 'ouvert') {
+        document.getElementById('form-page').style.display = 'block';
+      } else {
+        document.getElementById('complet-page').classList.add('visible');
+      }
+    } catch(e) {
+      // Erreur réseau : on affiche quand même le formulaire
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('form-page').style.display = 'block';
+    }
+  }
+
+  verifierStatut();
+
+  // Empêcher les dates passées
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('date').setAttribute('min', today);
 
   function valider() {
     const obligatoires = ['prenom', 'nom', 'email', 'tel', 'date', 'heure', 'couverts'];
@@ -430,15 +496,15 @@
     }
 
     const data = {
-      prenom:   document.getElementById('prenom').value.trim(),
-      nom:      document.getElementById('nom').value.trim(),
-      email:    document.getElementById('email').value.trim(),
-      tel:      document.getElementById('tel').value.trim(),
-      date:     document.getElementById('date').value,
-      heure:    document.getElementById('heure').value,
-      couverts: document.getElementById('couverts').value,
-      allergie: document.getElementById('allergie').value.trim(),
-      message:  document.getElementById('message').value.trim(),
+      prenom:    document.getElementById('prenom').value.trim(),
+      nom:       document.getElementById('nom').value.trim(),
+      email:     document.getElementById('email').value.trim(),
+      tel:       document.getElementById('tel').value.trim(),
+      date:      document.getElementById('date').value,
+      heure:     document.getElementById('heure').value,
+      couverts:  document.getElementById('couverts').value,
+      allergie:  document.getElementById('allergie').value.trim(),
+      message:   document.getElementById('message').value.trim(),
       soumis_le: new Date().toLocaleString('fr-FR')
     };
 
@@ -452,7 +518,6 @@
         body: JSON.stringify(data)
       });
 
-      // Afficher la page de confirmation
       const dateFormatee = new Date(data.date).toLocaleDateString('fr-FR', {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
       });
@@ -466,7 +531,7 @@
       document.getElementById('confirmation-page').classList.add('visible');
       window.scrollTo(0, 0);
 
-    } catch (e) {
+    } catch(e) {
       afficherErreur('Erreur de connexion. Veuillez réessayer ou nous appeler directement.');
       btn.disabled = false;
       btn.textContent = 'Réserver ma table';
@@ -474,8 +539,8 @@
   }
 
   function retour() {
-    document.getElementById('form-page').style.display = 'block';
     document.getElementById('confirmation-page').classList.remove('visible');
+    document.getElementById('form-page').style.display = 'block';
     document.getElementById('btn').disabled = false;
     document.getElementById('btn').textContent = 'Réserver ma table';
     ['prenom','nom','email','tel','date','heure','couverts','allergie','message']
@@ -483,10 +548,6 @@
     cacherErreur();
     window.scrollTo(0, 0);
   }
-
-  // Empêcher les dates passées
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('date').setAttribute('min', today);
 </script>
 
 </body>
