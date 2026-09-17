@@ -9,9 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Lato:wght@300;400&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     html { scroll-behavior: smooth; }
-
     body {
       font-family: 'Lato', sans-serif;
       font-weight: 300;
@@ -19,21 +17,17 @@
       color: #1A1410;
       min-height: 100vh;
     }
-
     .page {
       max-width: 560px;
       margin: 0 auto;
       background: #F5F0E8;
       min-height: 100vh;
     }
-
-    /* HERO */
     .hero {
       background: #1A1410;
       padding: 3.5rem 2rem 2.5rem;
       text-align: center;
     }
-
     .hero-eyebrow {
       font-size: 10px;
       letter-spacing: 0.3em;
@@ -42,7 +36,6 @@
       margin-bottom: 1rem;
       font-weight: 400;
     }
-
     .hero h1 {
       font-family: 'IM Fell English', serif;
       font-size: 42px;
@@ -51,41 +44,21 @@
       line-height: 1.1;
       margin-bottom: 0.75rem;
     }
-
     .hero-sub {
       font-size: 12px;
       color: #7A6A52;
       letter-spacing: 0.15em;
       text-transform: uppercase;
     }
-
-    /* DIVIDER */
     .divider {
       display: flex;
       align-items: center;
       gap: 1rem;
       padding: 1.75rem 2rem;
     }
-
-    .divider-line {
-      height: 0.5px;
-      flex: 1;
-      background: #C8A84B;
-      opacity: 0.4;
-    }
-
-    .divider-ornament {
-      color: #C8A84B;
-      font-size: 20px;
-      font-family: 'IM Fell English', serif;
-      line-height: 1;
-    }
-
-    /* FORM */
-    .form-section {
-      padding: 0 2rem 3rem;
-    }
-
+    .divider-line { height: 0.5px; flex: 1; background: #C8A84B; opacity: 0.4; }
+    .divider-ornament { color: #C8A84B; font-size: 20px; font-family: 'IM Fell English', serif; line-height: 1; }
+    .form-section { padding: 0 2rem 3rem; }
     .form-intro {
       text-align: center;
       font-family: 'IM Fell English', serif;
@@ -95,31 +68,10 @@
       margin-bottom: 2rem;
       line-height: 1.6;
     }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .form-group.full {
-      grid-column: 1 / -1;
-    }
-
-    label {
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: #8B7355;
-      font-weight: 400;
-    }
-
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #8B7355; font-weight: 400; }
     input, select, textarea {
       background: #EDE8DC;
       border: 0.5px solid #BBA96A;
@@ -135,35 +87,18 @@
       -webkit-appearance: none;
       appearance: none;
     }
-
-    input:focus, select:focus, textarea:focus {
-      border-color: #8B1A1A;
-      background: #F0EBE0;
-    }
-
-    input::placeholder, textarea::placeholder {
-      color: #A8977A;
-      font-weight: 300;
-    }
-
+    input:focus, select:focus, textarea:focus { border-color: #8B1A1A; background: #F0EBE0; }
+    input::placeholder, textarea::placeholder { color: #A8977A; font-weight: 300; }
     select {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C8A84B' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 12px center;
       padding-right: 32px;
       cursor: pointer;
-      color: #1A1410;
     }
-
     select option { color: #1A1410; background: #F5F0E8; }
-
-    textarea {
-      resize: none;
-      height: 80px;
-      line-height: 1.6;
-    }
-
-    /* SUBMIT BUTTON */
+    select option:disabled { color: #B0A090; font-style: italic; }
+    textarea { resize: none; height: 80px; line-height: 1.6; }
     .btn-submit {
       width: 100%;
       margin-top: 1.75rem;
@@ -180,11 +115,8 @@
       cursor: pointer;
       transition: background 0.2s, opacity 0.2s;
     }
-
     .btn-submit:hover { background: #6E1414; }
     .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    /* ERROR */
     .error-msg {
       margin-top: 1rem;
       padding: 12px;
@@ -196,8 +128,14 @@
       border: 0.5px solid #D4A0A0;
       display: none;
     }
-
-    /* CENTERED PAGES (confirmation + complet) */
+    .hint-msg {
+      margin-top: 0.5rem;
+      font-size: 11px;
+      color: #8B7355;
+      font-style: italic;
+      display: none;
+      text-align: center;
+    }
     .centered-page {
       display: none;
       flex-direction: column;
@@ -208,55 +146,13 @@
       text-align: center;
       background: #F5F0E8;
     }
-
     .centered-page.visible { display: flex; }
-
-    .centered-ornament {
-      font-size: 36px;
-      color: #C8A84B;
-      margin-bottom: 2rem;
-      font-family: 'IM Fell English', serif;
-    }
-
-    .centered-page h2 {
-      font-family: 'IM Fell English', serif;
-      font-size: 30px;
-      font-weight: 400;
-      color: #1A1410;
-      margin-bottom: 1.25rem;
-    }
-
-    .centered-msg {
-      font-family: 'IM Fell English', serif;
-      font-style: italic;
-      font-size: 15px;
-      color: #5C4A32;
-      line-height: 1.7;
-      max-width: 340px;
-    }
-
-    .centered-sub {
-      font-size: 12px;
-      color: #8B7355;
-      margin-top: 0.75rem;
-      letter-spacing: 0.05em;
-    }
-
-    .centered-sep {
-      width: 60px;
-      height: 0.5px;
-      background: #C8A84B;
-      opacity: 0.5;
-      margin: 2.5rem auto;
-    }
-
-    .centered-footer {
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: #8B7355;
-    }
-
+    .centered-ornament { font-size: 36px; color: #C8A84B; margin-bottom: 2rem; font-family: 'IM Fell English', serif; }
+    .centered-page h2 { font-family: 'IM Fell English', serif; font-size: 30px; font-weight: 400; color: #1A1410; margin-bottom: 1.25rem; }
+    .centered-msg { font-family: 'IM Fell English', serif; font-style: italic; font-size: 15px; color: #5C4A32; line-height: 1.7; max-width: 340px; }
+    .centered-sub { font-size: 12px; color: #8B7355; margin-top: 0.75rem; letter-spacing: 0.05em; }
+    .centered-sep { width: 60px; height: 0.5px; background: #C8A84B; opacity: 0.5; margin: 2.5rem auto; }
+    .centered-footer { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #8B7355; }
     .btn-retour {
       margin-top: 2rem;
       padding: 10px 24px;
@@ -272,46 +168,15 @@
       cursor: pointer;
       transition: background 0.2s, color 0.2s;
     }
-
     .btn-retour:hover { background: #8B1A1A; color: #F5F0E8; }
-
-    /* FOOTER */
-    .footer {
-      text-align: center;
-      font-size: 10px;
-      color: #8B7355;
-      padding: 1.5rem 2rem;
-      border-top: 0.5px solid rgba(200, 168, 75, 0.3);
-      letter-spacing: 0.08em;
-    }
-
-    /* LOADER */
-    .loader {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background: #F5F0E8;
-    }
-
-    .loader-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #C8A84B;
-      margin: 0 4px;
-      animation: pulse 1.2s ease-in-out infinite;
-    }
-
+    .footer { text-align: center; font-size: 10px; color: #8B7355; padding: 1.5rem 2rem; border-top: 0.5px solid rgba(200,168,75,0.3); letter-spacing: 0.08em; }
+    .loader { display: flex; align-items: center; justify-content: center; padding: 20px 0; gap: 6px; }
+    .loader-dot { width: 5px; height: 5px; border-radius: 50%; background: #C8A84B; animation: pulse 1.2s ease-in-out infinite; }
     .loader-dot:nth-child(2) { animation-delay: 0.2s; }
     .loader-dot:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.2; transform: scale(0.8); }
-      50% { opacity: 1; transform: scale(1); }
-    }
-
-    /* RESPONSIVE */
+    @keyframes pulse { 0%,100%{opacity:0.2;transform:scale(0.8)} 50%{opacity:1;transform:scale(1)} }
+    .slot-loading { display: none; }
+    .slot-loading.visible { display: block; }
     @media (max-width: 480px) {
       .form-grid { grid-template-columns: 1fr; }
       .form-group.full { grid-column: 1; }
@@ -320,33 +185,22 @@
   </style>
 </head>
 <body>
-
 <div class="page">
 
-  <!-- LOADER -->
-  <div class="loader" id="loader">
-    <div class="loader-dot"></div>
-    <div class="loader-dot"></div>
-    <div class="loader-dot"></div>
-  </div>
-
   <!-- FORMULAIRE -->
-  <div id="form-page" style="display:none;">
+  <div id="form-page">
     <div class="hero">
       <div class="hero-eyebrow">Flavigny-sur-Ozerain &middot; Bourgogne</div>
       <h1>Crêperie<br>Burgonde</h1>
       <div class="hero-sub">Réservation de table</div>
     </div>
-
     <div class="divider">
       <div class="divider-line"></div>
       <div class="divider-ornament">⚜</div>
       <div class="divider-line"></div>
     </div>
-
     <div class="form-section">
       <p class="form-intro">Réservez votre table en quelques instants.<br>Nous vous confirmerons par email.</p>
-
       <div class="form-grid">
         <div class="form-group">
           <label for="prenom">Prénom *</label>
@@ -365,29 +219,6 @@
           <input type="tel" id="tel" placeholder="06 12 34 56 78" autocomplete="tel" />
         </div>
         <div class="form-group">
-          <label for="date">Date *</label>
-          <input type="date" id="date" />
-        </div>
-        <div class="form-group">
-          <label for="heure">Heure *</label>
-          <select id="heure">
-            <option value="">Choisir...</option>
-            <optgroup label="Déjeuner">
-              <option>12h00</option>
-              <option>12h30</option>
-              <option>13h00</option>
-              <option>13h30</option>
-            </optgroup>
-            <optgroup label="Dîner">
-              <option>19h00</option>
-              <option>19h30</option>
-              <option>20h00</option>
-              <option>20h30</option>
-              <option>21h00</option>
-            </optgroup>
-          </select>
-        </div>
-        <div class="form-group">
           <label for="couverts">Couverts *</label>
           <select id="couverts">
             <option value="">Choisir...</option>
@@ -398,8 +229,35 @@
             <option value="5">5 personnes</option>
             <option value="6">6 personnes</option>
             <option value="7">7 personnes</option>
-            <option value="8+">8 personnes ou plus</option>
+            <option value="8">8 personnes</option>
+            <option value="9">9 personnes</option>
+            <option value="10">10 personnes</option>
+            <option value="11">11 personnes</option>
+            <option value="12">12 personnes</option>
+            <option value="13">13 personnes</option>
+            <option value="14">14 personnes</option>
+            <option value="15">15 personnes</option>
+            <option value="16">16 personnes</option>
+            <option value="17">17 personnes</option>
           </select>
+        </div>
+        <div class="form-group">
+          <label for="date">Date *</label>
+          <input type="date" id="date" onchange="chargerCreneaux()" />
+        </div>
+        <div class="form-group full">
+          <label for="heure">Heure *</label>
+          <div class="slot-loading" id="slot-loading">
+            <div class="loader">
+              <div class="loader-dot"></div>
+              <div class="loader-dot"></div>
+              <div class="loader-dot"></div>
+            </div>
+          </div>
+          <select id="heure" disabled>
+            <option value="">Choisissez d'abord une date...</option>
+          </select>
+          <div class="hint-msg" id="hint-msg"></div>
         </div>
         <div class="form-group">
           <label for="allergie">Allergies / régime</label>
@@ -410,14 +268,10 @@
           <textarea id="message" placeholder="Occasion spéciale, chaise haute, anniversaire..."></textarea>
         </div>
       </div>
-
       <button class="btn-submit" id="btn" onclick="soumettre()">Réserver ma table</button>
       <div class="error-msg" id="error"></div>
     </div>
-
-    <div class="footer">
-      Crêperie Burgonde &middot; Flavigny-sur-Ozerain &middot; 21150
-    </div>
+    <div class="footer">Crêperie Burgonde &middot; Flavigny-sur-Ozerain &middot; 21150</div>
   </div>
 
   <!-- PAGE CONFIRMATION -->
@@ -431,13 +285,11 @@
     <button class="btn-retour" onclick="retour()">Faire une autre réservation</button>
   </div>
 
-  <!-- PAGE COMPLET -->
-  <div class="centered-page" id="complet-page">
+  <!-- PAGE FERMÉ CE JOUR -->
+  <div class="centered-page" id="ferme-page">
     <div class="centered-ornament">⚜</div>
-    <h2>Réservations complètes</h2>
-    <p class="centered-msg">
-      Nous sommes complets pour le moment.<br>N'hésitez pas à nous contacter directement.
-    </p>
+    <h2>Fermé ce jour</h2>
+    <p class="centered-msg">La Crêperie Burgonde n'est pas ouverte à cette date.<br>Choisissez un autre jour.</p>
     <div class="centered-sep"></div>
     <div class="centered-footer">Crêperie Burgonde &middot; Flavigny-sur-Ozerain</div>
   </div>
@@ -445,39 +297,92 @@
 </div>
 
 <script>
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz2nMVUCBeaY0mLXApbOJW0vLOKRdI0xPVploNODyw3QRedyfGm58dghJmdWjwrE4/exec';
-
-  // Vérifier le statut ouvert/fermé au chargement
-  async function verifierStatut() {
-    try {
-      const resp = await fetch(SCRIPT_URL);
-      const statut = await resp.text();
-      document.getElementById('loader').style.display = 'none';
-      if (statut.trim() === 'ouvert') {
-        document.getElementById('form-page').style.display = 'block';
-      } else {
-        document.getElementById('complet-page').classList.add('visible');
-      }
-    } catch(e) {
-      // Erreur réseau : on affiche quand même le formulaire
-      document.getElementById('loader').style.display = 'none';
-      document.getElementById('form-page').style.display = 'block';
-    }
-  }
-
-  verifierStatut();
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzckOzjltSNOahBmqK75gkyWPMHRAlCBre3BBFJeAxEDdVsK0ier3mATb9tCQfSzbE/exec';
+  const MAX_COUVERTS = 17;
 
   // Empêcher les dates passées
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('date').setAttribute('min', today);
 
+  async function chargerCreneaux() {
+    const dateVal = document.getElementById('date').value;
+    if (!dateVal) return;
+
+    const selectHeure = document.getElementById('heure');
+    const slotLoading = document.getElementById('slot-loading');
+    const hintMsg = document.getElementById('hint-msg');
+
+    // Reset
+    selectHeure.style.display = 'none';
+    selectHeure.disabled = true;
+    selectHeure.innerHTML = '<option value="">Chargement...</option>';
+    slotLoading.classList.add('visible');
+    hintMsg.style.display = 'none';
+    cacherErreur();
+
+    try {
+      const resp = await fetch(SCRIPT_URL + '?date=' + dateVal);
+      const json = await resp.json();
+
+      slotLoading.classList.remove('visible');
+      selectHeure.style.display = 'block';
+
+      if (!json.slots || json.slots.length === 0) {
+        selectHeure.innerHTML = '<option value="">Fermé ce jour</option>';
+        hintMsg.textContent = 'La crêperie est fermée à cette date.';
+        hintMsg.style.display = 'block';
+        return;
+      }
+
+      const nbCouverts = parseInt(document.getElementById('couverts').value) || 1;
+      let html = '<option value="">Choisir un créneau...</option>';
+      let tousComplets = true;
+
+      json.slots.forEach(function(slot) {
+        const pris = json.pris[slot] || 0;
+        const restants = MAX_COUVERTS - pris;
+        const complet = restants <= 0 || restants < nbCouverts;
+
+        if (!complet) tousComplets = false;
+
+        if (complet) {
+          html += '<option value="" disabled>' + slot + ' — complet</option>';
+        } else {
+          const label = restants <= 4
+            ? slot + ' (' + restants + ' place' + (restants > 1 ? 's' : '') + ' restante' + (restants > 1 ? 's' : '') + ')'
+            : slot;
+          html += '<option value="' + slot + '">' + label + '</option>';
+        }
+      });
+
+      selectHeure.innerHTML = html;
+      selectHeure.disabled = false;
+
+      if (tousComplets) {
+        hintMsg.textContent = 'Tous les créneaux sont complets pour cette date.';
+        hintMsg.style.display = 'block';
+      }
+
+    } catch(err) {
+      slotLoading.classList.remove('visible');
+      selectHeure.style.display = 'block';
+      selectHeure.innerHTML = '<option value="">Erreur de chargement</option>';
+      afficherErreur('Impossible de charger les créneaux. Veuillez réessayer.');
+    }
+  }
+
+  // Recharger les créneaux si on change le nombre de couverts (pour recalculer la dispo)
+  document.getElementById('couverts').addEventListener('change', function() {
+    if (document.getElementById('date').value) chargerCreneaux();
+  });
+
   function valider() {
-    const obligatoires = ['prenom', 'nom', 'email', 'tel', 'date', 'heure', 'couverts'];
-    return obligatoires.every(id => document.getElementById(id).value.trim() !== '');
+    return ['prenom','nom','email','tel','date','heure','couverts']
+      .every(function(id) { return document.getElementById(id).value.trim() !== ''; });
   }
 
   function afficherErreur(msg) {
-    const el = document.getElementById('error');
+    var el = document.getElementById('error');
     el.textContent = msg;
     el.style.display = 'block';
   }
@@ -488,21 +393,20 @@
 
   async function soumettre() {
     cacherErreur();
-    const btn = document.getElementById('btn');
-
+    var btn = document.getElementById('btn');
     if (!valider()) {
       afficherErreur('Merci de remplir tous les champs obligatoires (*).');
       return;
     }
 
-    const data = {
+    var data = {
       prenom:    document.getElementById('prenom').value.trim(),
       nom:       document.getElementById('nom').value.trim(),
       email:     document.getElementById('email').value.trim(),
       tel:       document.getElementById('tel').value.trim(),
       date:      document.getElementById('date').value,
       heure:     document.getElementById('heure').value,
-      couverts:  document.getElementById('couverts').value,
+      couverts:  document.getElementById('couverts').value + ' personne' + (parseInt(document.getElementById('couverts').value) > 1 ? 's' : ''),
       allergie:  document.getElementById('allergie').value.trim(),
       message:   document.getElementById('message').value.trim(),
       soumis_le: new Date().toLocaleString('fr-FR')
@@ -518,14 +422,14 @@
         body: JSON.stringify(data)
       });
 
-      const dateFormatee = new Date(data.date).toLocaleDateString('fr-FR', {
+      var dateFormatee = new Date(data.date + 'T12:00:00').toLocaleDateString('fr-FR', {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
       });
 
       document.getElementById('conf-msg').textContent =
-        `Merci ${data.prenom}, nous vous attendons le ${dateFormatee} à ${data.heure} pour ${data.couverts}.`;
+        'Merci ' + data.prenom + ', nous vous attendons le ' + dateFormatee + ' à ' + data.heure + ' pour ' + data.couverts + '.';
       document.getElementById('conf-email').textContent =
-        `Un email de confirmation a été envoyé à ${data.email}`;
+        'Un email de confirmation a été envoyé à ' + data.email;
 
       document.getElementById('form-page').style.display = 'none';
       document.getElementById('confirmation-page').classList.add('visible');
@@ -543,12 +447,16 @@
     document.getElementById('form-page').style.display = 'block';
     document.getElementById('btn').disabled = false;
     document.getElementById('btn').textContent = 'Réserver ma table';
-    ['prenom','nom','email','tel','date','heure','couverts','allergie','message']
-      .forEach(id => document.getElementById(id).value = '');
+    ['prenom','nom','email','tel','date','allergie','message'].forEach(function(id) {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('couverts').value = '';
+    document.getElementById('heure').innerHTML = '<option value="">Choisissez d\'abord une date...</option>';
+    document.getElementById('heure').disabled = true;
+    document.getElementById('hint-msg').style.display = 'none';
     cacherErreur();
     window.scrollTo(0, 0);
   }
 </script>
-
 </body>
 </html>
