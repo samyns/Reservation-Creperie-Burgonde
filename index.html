@@ -1,336 +1,377 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Crêperie Burgonde — Réservation</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Lato:wght@300;400&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Lato', sans-serif; font-weight: 300; background: #EDE8DC; color: #1A1410; min-height: 100vh; }
-    .page { max-width: 560px; margin: 0 auto; background: #F5F0E8; min-height: 100vh; }
-    .hero { background: #1A1410; padding: 3.5rem 2rem 2.5rem; text-align: center; }
-    .hero-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #C8A84B; margin-bottom: 1rem; font-weight: 400; }
-    .hero h1 { font-family: 'IM Fell English', serif; font-size: 42px; font-weight: 400; color: #F5F0E8; line-height: 1.1; margin-bottom: 0.75rem; }
-    .hero-sub { font-size: 12px; color: #7A6A52; letter-spacing: 0.15em; text-transform: uppercase; }
-    .divider { display: flex; align-items: center; gap: 1rem; padding: 1.75rem 2rem; }
-    .divider-line { height: 0.5px; flex: 1; background: #C8A84B; opacity: 0.4; }
-    .divider-ornament { color: #C8A84B; font-size: 20px; font-family: 'IM Fell English', serif; line-height: 1; }
-    .form-section { padding: 0 2rem 3rem; }
-    .form-intro { text-align: center; font-family: 'IM Fell English', serif; font-style: italic; font-size: 15px; color: #5C4A32; margin-bottom: 2rem; line-height: 1.6; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-group.full { grid-column: 1 / -1; }
-    label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #8B7355; font-weight: 400; }
-    input, select, textarea {
-      background: #EDE8DC; border: 0.5px solid #BBA96A; border-radius: 3px;
-      padding: 10px 12px; font-family: 'Lato', sans-serif; font-size: 14px;
-      font-weight: 300; color: #1A1410; outline: none; transition: border-color 0.2s;
-      width: 100%; -webkit-appearance: none; appearance: none;
+// ============================================================
+// Crêperie Burgonde — Google Apps Script v8
+// - Compteur par service (midi/soir) et non par créneau
+// - Blocage manuel via onglet "Blocages"
+// - MAX 15 couverts par service
+// ============================================================
+
+var EMAIL_GERANT = 'creperieburgonde@gmail.com';
+var NOM_RESTAURANT = 'Crêperie Burgonde';
+var TEL_RESTAURANT = '';
+var MAX_COUVERTS = 15;
+
+// ------------------------------------------------------------
+// Horaires fixes par jour
+// Retourne { midi: ["12h00","12h30",...], soir: ["19h00",...] }
+// Les clés absentes = service fermé ce jour
+// ------------------------------------------------------------
+function getServicesJour(dateStr) {
+  var date = new Date(dateStr + 'T12:00:00');
+  var jour = date.getDay(); // 0=dim,1=lun,2=mar,3=mer,4=jeu,5=ven,6=sam
+
+  function slots(debut, fin) {
+    var result = [];
+    var parts = debut.split(':');
+    var h = parseInt(parts[0]), m = parseInt(parts[1]);
+    var fparts = fin.split(':');
+    var hf = parseInt(fparts[0]), mf = parseInt(fparts[1]);
+    while (h < hf || (h === hf && m <= mf)) {
+      result.push(h + 'h' + (m === 0 ? '00' : String(m)));
+      m += 30;
+      if (m >= 60) { h++; m -= 60; }
     }
-    input:focus, select:focus, textarea:focus { border-color: #8B1A1A; background: #F0EBE0; }
-    input::placeholder, textarea::placeholder { color: #A8977A; font-weight: 300; }
-    select {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C8A84B' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; cursor: pointer;
-    }
-    select option { color: #1A1410; background: #F5F0E8; }
-    select option:disabled { color: #B0A090; font-style: italic; }
-    textarea { resize: none; height: 80px; line-height: 1.6; }
-    .btn-submit {
-      width: 100%; margin-top: 1.75rem; padding: 15px; background: #8B1A1A; color: #F5F0E8;
-      border: none; border-radius: 3px; font-family: 'Lato', sans-serif; font-size: 11px;
-      font-weight: 400; letter-spacing: 0.25em; text-transform: uppercase; cursor: pointer;
-      transition: background 0.2s, opacity 0.2s;
-    }
-    .btn-submit:hover { background: #6E1414; }
-    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-    .error-msg { margin-top: 1rem; padding: 12px; border-radius: 3px; font-size: 13px; text-align: center; background: #F0D4D4; color: #6E1414; border: 0.5px solid #D4A0A0; display: none; }
-    .hint-msg { margin-top: 0.5rem; font-size: 11px; color: #8B7355; font-style: italic; display: none; text-align: center; }
-    .centered-page { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 4rem 2rem; text-align: center; background: #F5F0E8; }
-    .centered-page.visible { display: flex; }
-    .centered-ornament { font-size: 36px; color: #C8A84B; margin-bottom: 2rem; font-family: 'IM Fell English', serif; }
-    .centered-page h2 { font-family: 'IM Fell English', serif; font-size: 30px; font-weight: 400; color: #1A1410; margin-bottom: 1.25rem; }
-    .centered-msg { font-family: 'IM Fell English', serif; font-style: italic; font-size: 15px; color: #5C4A32; line-height: 1.7; max-width: 340px; }
-    .centered-sub { font-size: 12px; color: #8B7355; margin-top: 0.75rem; letter-spacing: 0.05em; }
-    .centered-sep { width: 60px; height: 0.5px; background: #C8A84B; opacity: 0.5; margin: 2.5rem auto; }
-    .centered-footer { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #8B7355; }
-    .btn-retour { margin-top: 2rem; padding: 10px 24px; background: transparent; color: #8B1A1A; border: 0.5px solid #8B1A1A; border-radius: 3px; font-family: 'Lato', sans-serif; font-size: 11px; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; transition: background 0.2s, color 0.2s; }
-    .btn-retour:hover { background: #8B1A1A; color: #F5F0E8; }
-    .footer { text-align: center; font-size: 10px; color: #8B7355; padding: 1.5rem 2rem; border-top: 0.5px solid rgba(200,168,75,0.3); letter-spacing: 0.08em; }
-    .loader { display: flex; align-items: center; justify-content: center; padding: 20px 0; gap: 6px; }
-    .loader-dot { width: 5px; height: 5px; border-radius: 50%; background: #C8A84B; animation: pulse 1.2s ease-in-out infinite; }
-    .loader-dot:nth-child(2) { animation-delay: 0.2s; }
-    .loader-dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes pulse { 0%,100%{opacity:0.2;transform:scale(0.8)} 50%{opacity:1;transform:scale(1)} }
-    .slot-loading { display: none; }
-    .slot-loading.visible { display: block; }
-    @media (max-width: 480px) { .form-grid { grid-template-columns: 1fr; } .form-group.full { grid-column: 1; } .hero h1 { font-size: 34px; } }
-  </style>
-</head>
-<body>
-<div class="page">
+    return result;
+  }
 
-  <div id="form-page">
-    <div class="hero">
-      <div class="hero-eyebrow">Flavigny-sur-Ozerain &middot; Bourgogne</div>
-      <h1>Crêperie<br>Burgonde</h1>
-      <div class="hero-sub">Réservation de table</div>
-    </div>
-    <div class="divider">
-      <div class="divider-line"></div>
-      <div class="divider-ornament">⚜</div>
-      <div class="divider-line"></div>
-    </div>
-    <div class="form-section">
-      <p class="form-intro">Réservez votre table en quelques instants.<br>Nous vous confirmerons par email.</p>
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="prenom">Prénom *</label>
-          <input type="text" id="prenom" placeholder="Marie" autocomplete="given-name" />
-        </div>
-        <div class="form-group">
-          <label for="nom">Nom *</label>
-          <input type="text" id="nom" placeholder="Dupont" autocomplete="family-name" />
-        </div>
-        <div class="form-group">
-          <label for="email">Email *</label>
-          <input type="email" id="email" placeholder="marie@exemple.fr" autocomplete="email" />
-        </div>
-        <div class="form-group">
-          <label for="tel">Téléphone *</label>
-          <input type="tel" id="tel" placeholder="06 12 34 56 78" autocomplete="tel" />
-        </div>
-        <div class="form-group">
-          <label for="couverts">Couverts *</label>
-          <select id="couverts" onchange="if(document.getElementById('date').value) chargerCreneaux()">
-            <option value="">Choisir...</option>
-            <option value="1">1 personne</option>
-            <option value="2">2 personnes</option>
-            <option value="3">3 personnes</option>
-            <option value="4">4 personnes</option>
-            <option value="5">5 personnes</option>
-            <option value="6">6 personnes</option>
-            <option value="7">7 personnes</option>
-            <option value="8">8 personnes</option>
-            <option value="9">9 personnes</option>
-            <option value="10">10 personnes</option>
-            <option value="11">11 personnes</option>
-            <option value="12">12 personnes</option>
-            <option value="13">13 personnes</option>
-            <option value="14">14 personnes</option>
-            <option value="15">15 personnes</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="date">Date *</label>
-          <input type="date" id="date" onchange="chargerCreneaux()" />
-        </div>
-        <div class="form-group full">
-          <label for="heure">Heure *</label>
-          <div class="slot-loading" id="slot-loading">
-            <div class="loader">
-              <div class="loader-dot"></div>
-              <div class="loader-dot"></div>
-              <div class="loader-dot"></div>
-            </div>
-          </div>
-          <select id="heure" disabled>
-            <option value="">Choisissez d'abord une date...</option>
-          </select>
-          <div class="hint-msg" id="hint-msg"></div>
-        </div>
-        <div class="form-group">
-          <label for="allergie">Allergies / régime</label>
-          <input type="text" id="allergie" placeholder="Sans gluten, végétarien..." />
-        </div>
-        <div class="form-group full">
-          <label for="message">Message (facultatif)</label>
-          <textarea id="message" placeholder="Occasion spéciale, chaise haute, anniversaire..."></textarea>
-        </div>
-      </div>
-      <button class="btn-submit" id="btn" onclick="soumettre()">Réserver ma table</button>
-      <div class="error-msg" id="error"></div>
-    </div>
-    <div class="footer">Crêperie Burgonde &middot; Flavigny-sur-Ozerain &middot; 21150</div>
-  </div>
+  var midi = slots('12:00', '13:30');
 
-  <div class="centered-page" id="confirmation-page">
-    <div class="centered-ornament">⚜</div>
-    <h2>Réservation confirmée</h2>
-    <p class="centered-msg" id="conf-msg"></p>
-    <p class="centered-sub" id="conf-email"></p>
-    <div class="centered-sep"></div>
-    <div class="centered-footer">Crêperie Burgonde &middot; Flavigny-sur-Ozerain</div>
-    <button class="btn-retour" onclick="retour()">Faire une autre réservation</button>
-  </div>
+  if (jour === 4) return {}; // jeudi fermé
+  if (jour === 3) return { midi: midi }; // mercredi : midi seulement
+  if (jour === 5) return { soir: slots('19:00', '22:00') }; // vendredi : soir seulement
+  if (jour === 6) return { midi: midi, soir: slots('19:00', '22:00') }; // samedi
+  // lundi, mardi, dimanche
+  return { midi: midi, soir: slots('19:00', '21:00') };
+}
 
-</div>
+// Retourne le nom du service ("midi" ou "soir") pour un créneau donné
+function getServiceDuCreneau(heureStr) {
+  var match = String(heureStr).match(/(\d+)h/);
+  if (!match) return null;
+  var h = parseInt(match[1]);
+  return h < 15 ? 'midi' : 'soir';
+}
 
-<script>
-  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx-G9uJvRmgKk4OHrdn7bH_Dc87WCHlP0qNkkPXlHXEU1mFaLAGLIXwYQtq0YCxayE/exec';
-  var MAX_COUVERTS = 15;
+// Normalise une heure venant du Sheet (parfois convertie en Date par Sheets)
+function normaliserHeure(rawHeure) {
+  if (rawHeure instanceof Date) {
+    var h = rawHeure.getHours();
+    var m = rawHeure.getMinutes();
+    return h + 'h' + (m === 0 ? '00' : String(m));
+  }
+  return String(rawHeure).trim();
+}
 
-  document.getElementById('date').setAttribute('min', new Date().toISOString().split('T')[0]);
-
-  async function chargerCreneaux() {
-    var dateVal = document.getElementById('date').value;
-    if (!dateVal) return;
-
-    var selectHeure = document.getElementById('heure');
-    var slotLoading = document.getElementById('slot-loading');
-    var hintMsg = document.getElementById('hint-msg');
-
-    selectHeure.style.display = 'none';
-    selectHeure.disabled = true;
-    selectHeure.innerHTML = '<option value="">Chargement...</option>';
-    slotLoading.classList.add('visible');
-    hintMsg.style.display = 'none';
-    cacherErreur();
-
-    try {
-      var resp = await fetch(SCRIPT_URL + '?action=creneaux&date=' + dateVal);
-      var json = await resp.json();
-
-      slotLoading.classList.remove('visible');
-      selectHeure.style.display = 'block';
-
-      if (!json.slots || json.slots.length === 0) {
-        selectHeure.innerHTML = '<option value="">Fermé ce jour</option>';
-        hintMsg.textContent = 'La crêperie est fermée à cette date.';
-        hintMsg.style.display = 'block';
-        return;
-      }
-
-      var nbCouverts = parseInt(document.getElementById('couverts').value) || 1;
-      var html = '<option value="">Choisir un créneau...</option>';
-      var tousComplets = true;
-
-      json.slots.forEach(function(slot) {
-        var pris = json.pris[slot] || 0;
-        var restants = MAX_COUVERTS - pris;
-        var complet = restants <= 0 || restants < nbCouverts;
-        if (!complet) tousComplets = false;
-        if (complet) {
-          html += '<option value="" disabled>' + slot + ' — complet</option>';
-        } else {
-          var label = restants <= 4
-            ? slot + ' (' + restants + ' place' + (restants > 1 ? 's' : '') + ' restante' + (restants > 1 ? 's' : '') + ')'
-            : slot;
-          html += '<option value="' + slot + '">' + label + '</option>';
+// ------------------------------------------------------------
+// Lit les blocages manuels depuis l'onglet "Blocages"
+// Retourne un objet { "2026-10-18_soir": true, ... }
+// ------------------------------------------------------------
+function getBlocages() {
+  var blocages = {};
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('Blocages');
+    if (!sheet) return blocages;
+    var lastRow = sheet.getLastRow();
+    if (lastRow <= 1) return blocages;
+    var rows = sheet.getRange(2, 1, lastRow - 1, 2).getValues();
+    rows.forEach(function(row) {
+      try {
+        var rawDate = row[0];
+        var rawService = String(row[1]).trim().toLowerCase();
+        if (!rawDate || !rawService) return;
+        var dateStr = rawDate instanceof Date
+          ? Utilities.formatDate(rawDate, 'Europe/Paris', 'yyyy-MM-dd')
+          : String(rawDate).trim();
+        if (rawService === 'midi' || rawService === 'soir') {
+          blocages[dateStr + '_' + rawService] = true;
+        } else if (rawService === 'journée entière') {
+          blocages[dateStr + '_midi'] = true;
+          blocages[dateStr + '_soir'] = true;
         }
-      });
-
-      selectHeure.innerHTML = html;
-      selectHeure.disabled = false;
-
-      if (tousComplets) {
-        hintMsg.textContent = 'Tous les créneaux sont complets pour cette date.';
-        hintMsg.style.display = 'block';
-      }
-
-    } catch(err) {
-      slotLoading.classList.remove('visible');
-      selectHeure.style.display = 'block';
-      selectHeure.innerHTML = '<option value="">Erreur de chargement</option>';
-      afficherErreur('Impossible de charger les créneaux. Veuillez réessayer.');
-    }
-  }
-
-  function valider() {
-    return ['prenom','nom','email','tel','date','heure','couverts'].every(function(id) {
-      return document.getElementById(id).value.trim() !== '';
+      } catch(err) {}
     });
+  } catch(err) {}
+  return blocages;
+}
+
+// ------------------------------------------------------------
+// Compte les couverts par service pour une date
+// ------------------------------------------------------------
+function getCouverstParService(dateStr) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var lastRow = sheet.getLastRow();
+  var compteur = { midi: 0, soir: 0 };
+  if (lastRow <= 1) return compteur;
+  var data = sheet.getRange(2, 1, lastRow - 1, 10).getValues();
+  data.forEach(function(row) {
+    try {
+      var rowDate = row[5];
+      var rowDateStr = rowDate instanceof Date
+        ? Utilities.formatDate(rowDate, 'Europe/Paris', 'yyyy-MM-dd')
+        : String(rowDate).trim();
+      if (rowDateStr !== dateStr) return;
+      var heure = normaliserHeure(row[6]);
+      var service = getServiceDuCreneau(heure);
+      if (!service) return;
+      var nb = parseInt(String(row[7]).replace(/[^0-9]/g, '')) || 0;
+      compteur[service] += nb;
+    } catch(err) {}
+  });
+  return compteur;
+}
+
+// ------------------------------------------------------------
+// Point d'entrée unique — tout passe par doGet
+// ------------------------------------------------------------
+function doGet(e) {
+  var action = e.parameter.action;
+  if (action === 'creneaux') return getDisponibilites(e.parameter.date);
+  if (action === 'reserver') return traiterReservation(e.parameter.data);
+  return ContentService
+    .createTextOutput(JSON.stringify({ error: 'action inconnue' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ------------------------------------------------------------
+// Créneaux disponibles pour une date
+// Retourne slots avec statut : dispo / complet / bloque
+// ------------------------------------------------------------
+function getDisponibilites(dateStr) {
+  if (!dateStr) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ error: 'date manquante' }))
+      .setMimeType(ContentService.MimeType.JSON);
   }
 
-  function afficherErreur(msg) {
-    var el = document.getElementById('error');
-    el.textContent = msg;
-    el.style.display = 'block';
-  }
+  var services = getServicesJour(dateStr);
+  var blocages = getBlocages();
+  var couvertsPris = getCouverstParService(dateStr);
 
-  function cacherErreur() {
-    document.getElementById('error').style.display = 'none';
-  }
+  // Construire la liste des slots avec leur disponibilité
+  var slots = [];
+  var pris = {}; // couverts pris par service (pour le front)
 
-  async function soumettre() {
-    cacherErreur();
-    var btn = document.getElementById('btn');
+  ['midi', 'soir'].forEach(function(service) {
+    if (!services[service]) return;
+    var bloque = blocages[dateStr + '_' + service] || false;
+    var couvertsPrisService = couvertsPris[service] || 0;
+    pris[service] = couvertsPrisService;
 
-    if (!valider()) {
-      afficherErreur('Merci de remplir tous les champs obligatoires (*).');
-      return;
+    services[service].forEach(function(slot) {
+      slots.push({
+        heure: slot,
+        service: service,
+        bloque: bloque,
+        pris: couvertsPrisService
+      });
+    });
+  });
+
+  return ContentService
+    .createTextOutput(JSON.stringify({ slots: slots, max: MAX_COUVERTS }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ------------------------------------------------------------
+// Traitement d'une réservation
+// ------------------------------------------------------------
+function traiterReservation(rawData) {
+  try {
+    var data = JSON.parse(rawData);
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(['Date soumission', 'Prénom', 'Nom', 'Email', 'Téléphone',
+        'Date réservation', 'Heure', 'Couverts', 'Allergies', 'Message']);
+      sheet.getRange(1, 1, 1, 10).setFontWeight('bold');
+      sheet.setFrozenRows(1);
     }
 
-    var nbCouverts = document.getElementById('couverts').value;
-    var data = {
-      prenom:    document.getElementById('prenom').value.trim(),
-      nom:       document.getElementById('nom').value.trim(),
-      email:     document.getElementById('email').value.trim(),
-      tel:       document.getElementById('tel').value.trim(),
-      date:      document.getElementById('date').value,
-      heure:     document.getElementById('heure').value,
-      couverts:  nbCouverts + ' personne' + (parseInt(nbCouverts) > 1 ? 's' : ''),
-      allergie:  document.getElementById('allergie').value.trim(),
-      message:   document.getElementById('message').value.trim(),
-      soumis_le: new Date().toLocaleString('fr-FR')
-    };
+    // Vérif blocage
+    var blocages = getBlocages();
+    var service = getServiceDuCreneau(data.heure);
+    if (blocages[data.date + '_' + service]) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ error: 'bloque' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
 
-    btn.disabled = true;
-    btn.textContent = 'Envoi en cours...';
+    // Vérif capacité par service
+    var couvertsPris = getCouverstParService(data.date);
+    var dejaPris = couvertsPris[service] || 0;
+    var nbDemandes = parseInt(String(data.couverts).replace(/[^0-9]/g, '')) || 1;
+
+    if (dejaPris + nbDemandes > MAX_COUVERTS) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ error: 'complet' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
 
     try {
-      // Tout passe par GET pour éviter les problèmes CORS
-      var url = SCRIPT_URL + '?action=reserver&data=' + encodeURIComponent(JSON.stringify(data));
-      var resp = await fetch(url);
-      var json = await resp.json();
-
-      if (json.error === 'complet') {
-        afficherErreur('Ce créneau vient d\'être complet. Veuillez en choisir un autre.');
-        btn.disabled = false;
-        btn.textContent = 'Réserver ma table';
-        chargerCreneaux();
-        return;
-      }
-
-      var dateFormatee = new Date(data.date + 'T12:00:00').toLocaleDateString('fr-FR', {
-        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-      });
-
-      document.getElementById('conf-msg').textContent =
-        'Merci ' + data.prenom + ', nous vous attendons le ' + dateFormatee + ' à ' + data.heure + ' pour ' + data.couverts + '.';
-      document.getElementById('conf-email').textContent =
-        'Un email de confirmation a été envoyé à ' + data.email;
-
-      document.getElementById('form-page').style.display = 'none';
-      document.getElementById('confirmation-page').classList.add('visible');
-      window.scrollTo(0, 0);
-
-    } catch(err) {
-      afficherErreur('Erreur de connexion. Veuillez réessayer ou nous appeler directement.');
-      btn.disabled = false;
-      btn.textContent = 'Réserver ma table';
+      insererChronologique(sheet, data);
+    } catch(insertErr) {
+      Logger.log('insererChronologique planté : ' + insertErr.message);
+      sheet.appendRow([
+        data.soumis_le, data.prenom, data.nom, data.email, data.tel,
+        data.date, data.heure, data.couverts, data.allergie || '', data.message || ''
+      ]);
     }
-  }
 
-  function retour() {
-    document.getElementById('confirmation-page').classList.remove('visible');
-    document.getElementById('form-page').style.display = 'block';
-    document.getElementById('btn').disabled = false;
-    document.getElementById('btn').textContent = 'Réserver ma table';
-    ['prenom','nom','email','tel','date','allergie','message'].forEach(function(id) {
-      document.getElementById(id).value = '';
+    var dateObj = new Date(data.date + 'T12:00:00');
+    var dateFormatee = dateObj.toLocaleDateString('fr-FR', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
     });
-    document.getElementById('couverts').value = '';
-    document.getElementById('heure').innerHTML = "<option value=''>Choisissez d'abord une date...</option>";
-    document.getElementById('heure').disabled = true;
-    document.getElementById('hint-msg').style.display = 'none';
-    cacherErreur();
-    window.scrollTo(0, 0);
+
+    envoyerConfirmationClient(data, dateFormatee);
+    envoyerNotificationGerant(data, dateFormatee);
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: true }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch(err) {
+    Logger.log('traiterReservation erreur : ' + err.message);
+    return ContentService
+      .createTextOutput(JSON.stringify({ error: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
   }
-</script>
-</body>
-</html>
+}
+
+// ------------------------------------------------------------
+// Insertion chronologique
+// ------------------------------------------------------------
+function heureEnMinutes(heureStr) {
+  var match = String(heureStr).match(/(\d+)h(\d*)/);
+  if (!match) return 0;
+  return parseInt(match[1]) * 60 + (parseInt(match[2]) || 0);
+}
+
+function insererChronologique(sheet, data) {
+  var lastRow = sheet.getLastRow();
+  var newRow = [
+    data.soumis_le, data.prenom, data.nom, data.email, data.tel,
+    data.date, data.heure, data.couverts, data.allergie || '', data.message || ''
+  ];
+  if (lastRow <= 1) { sheet.appendRow(newRow); return; }
+  var rows = sheet.getRange(2, 1, lastRow - 1, 10).getValues();
+  var insertAt = lastRow + 1;
+  for (var i = 0; i < rows.length; i++) {
+    try {
+      var rowDate = rows[i][5];
+      var rowDateStr = rowDate instanceof Date
+        ? Utilities.formatDate(rowDate, 'Europe/Paris', 'yyyy-MM-dd')
+        : String(rowDate).trim();
+      var rowHeure = heureEnMinutes(normaliserHeure(rows[i][6]));
+      if (rowDateStr > data.date || (rowDateStr === data.date && rowHeure > heureEnMinutes(data.heure))) {
+        insertAt = i + 2; break;
+      }
+    } catch(err) { continue; }
+  }
+  if (insertAt > lastRow) { sheet.appendRow(newRow); }
+  else { sheet.insertRowBefore(insertAt); sheet.getRange(insertAt, 1, 1, 10).setValues([newRow]); }
+}
+
+// ------------------------------------------------------------
+// Suppression horaire des créneaux passés
+// ------------------------------------------------------------
+function supprimerReservationsPassees() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var lastRow = sheet.getLastRow();
+  if (lastRow <= 1) return;
+  var maintenant = new Date();
+  var rows = sheet.getRange(2, 1, lastRow - 1, 10).getValues();
+  for (var i = rows.length - 1; i >= 0; i--) {
+    try {
+      var rowDate = rows[i][5];
+      var dateStr = rowDate instanceof Date
+        ? Utilities.formatDate(rowDate, 'Europe/Paris', 'yyyy-MM-dd')
+        : String(rowDate).trim();
+      if (!dateStr) continue;
+      var heureNorm = normaliserHeure(rows[i][6]);
+      var match = heureNorm.match(/(\d+)h(\d*)/);
+      if (!match) continue;
+      var parts = dateStr.split('-').map(Number);
+      var creneauDate = new Date(parts[0], parts[1]-1, parts[2], parseInt(match[1]), parseInt(match[2])||0, 0);
+      if (creneauDate < maintenant) sheet.deleteRow(i + 2);
+    } catch(err) { continue; }
+  }
+}
+
+// ------------------------------------------------------------
+// Créer l'onglet Blocages avec liste déroulante (lancer une fois)
+// ------------------------------------------------------------
+function creerOngletBlocages() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var existing = ss.getSheetByName('Blocages');
+  if (existing) { Logger.log('Onglet Blocages existe déjà'); return; }
+
+  var sheet = ss.insertSheet('Blocages');
+
+  // En-têtes
+  sheet.getRange('A1').setValue('Date');
+  sheet.getRange('B1').setValue('Service');
+  sheet.getRange(1, 1, 1, 2).setFontWeight('bold');
+  sheet.setFrozenRows(1);
+
+  // Liste déroulante sur la colonne B
+  var rule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(['Midi', 'Soir', 'Journée entière'], true)
+    .setAllowInvalid(false)
+    .build();
+  sheet.getRange('B2:B100').setDataValidation(rule);
+
+  // Format date sur la colonne A
+  sheet.getRange('A2:A100').setNumberFormat('yyyy-MM-dd');
+
+  // Largeur des colonnes
+  sheet.setColumnWidth(1, 130);
+  sheet.setColumnWidth(2, 160);
+
+  Logger.log('Onglet Blocages créé avec succès');
+}
+
+// ------------------------------------------------------------
+// Installer le trigger horaire — lancer UNE SEULE FOIS
+// ------------------------------------------------------------
+function installerTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t) {
+    if (t.getHandlerFunction() === 'supprimerReservationsPassees') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('supprimerReservationsPassees').timeBased().everyHours(1).create();
+}
+
+// ------------------------------------------------------------
+// Email confirmation client
+// ------------------------------------------------------------
+function envoyerConfirmationClient(data, dateFormatee) {
+  var sujet = 'Votre réservation — ' + NOM_RESTAURANT;
+  var telLigne = TEL_RESTAURANT ? '<p style="margin:4px 0;font-size:13px;color:#5C4A32;">📞 ' + TEL_RESTAURANT + '</p>' : '';
+  var allergieLigne = data.allergie ? '<tr><td style="padding:6px 0;color:#8B7355;font-size:13px;font-family:Arial,sans-serif;width:40%;">Allergies</td><td style="padding:6px 0;font-size:13px;">' + data.allergie + '</td></tr>' : '';
+  var messageLigne = data.message ? '<tr><td style="padding:6px 0;color:#8B7355;font-size:13px;font-family:Arial,sans-serif;">Message</td><td style="padding:6px 0;font-size:13px;">' + data.message + '</td></tr>' : '';
+  var html = '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#EDE8DC;font-family:Georgia,serif;"><div style="max-width:520px;margin:40px auto;background:#F5F0E8;border-radius:4px;overflow:hidden;"><div style="background:#1A1410;padding:40px 32px;text-align:center;"><p style="margin:0 0 10px;font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C8A84B;font-family:Arial,sans-serif;">Flavigny-sur-Ozerain · Bourgogne</p><h1 style="margin:0 0 8px;font-size:32px;font-weight:400;color:#F5F0E8;line-height:1.2;">Crêperie<br>Burgonde</h1><p style="margin:0;font-size:11px;color:#7A6A52;letter-spacing:0.15em;text-transform:uppercase;font-family:Arial,sans-serif;">Confirmation de réservation</p></div><div style="padding:36px 32px;"><p style="font-size:15px;color:#5C4A32;font-style:italic;margin:0 0 16px;">Bonjour ' + data.prenom + ',</p><p style="font-size:14px;color:#1A1410;line-height:1.7;margin:0 0 28px;">Nous avons bien reçu votre réservation et nous aurons le plaisir de vous accueillir à la Crêperie Burgonde.</p><div style="background:#EDE8DC;border-radius:3px;padding:20px 24px;margin-bottom:28px;"><p style="font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:#8B7355;margin:0 0 16px;font-family:Arial,sans-serif;">Votre réservation</p><table style="width:100%;border-collapse:collapse;"><tr><td style="padding:6px 0;color:#8B7355;font-size:13px;font-family:Arial,sans-serif;width:40%;">Date</td><td style="padding:6px 0;font-size:13px;font-weight:bold;color:#1A1410;">' + dateFormatee + '</td></tr><tr><td style="padding:6px 0;color:#8B7355;font-size:13px;font-family:Arial,sans-serif;">Heure</td><td style="padding:6px 0;font-size:13px;font-weight:bold;color:#1A1410;">' + data.heure + '</td></tr><tr><td style="padding:6px 0;color:#8B7355;font-size:13px;font-family:Arial,sans-serif;">Couverts</td><td style="padding:6px 0;font-size:13px;font-weight:bold;color:#1A1410;">' + data.couverts + '</td></tr>' + allergieLigne + messageLigne + '</table></div><p style="font-size:13px;color:#5C4A32;line-height:1.7;margin:0 0 6px;">Pour modifier ou annuler votre réservation, répondez simplement à cet email.</p>' + telLigne + '<div style="border-top:0.5px solid rgba(200,168,75,0.4);margin:28px 0;"></div><p style="font-size:14px;color:#1A1410;font-style:italic;margin:0;">À très bientôt,<br><strong style="font-style:normal;">L\'équipe de la Crêperie Burgonde</strong></p></div><div style="background:#1A1410;padding:20px 32px;text-align:center;"><p style="margin:0;font-size:10px;color:#7A6A52;letter-spacing:0.1em;font-family:Arial,sans-serif;">Crêperie Burgonde · Flavigny-sur-Ozerain · 21150</p></div></div></body></html>';
+  MailApp.sendEmail({ to: data.email, replyTo: EMAIL_GERANT, subject: sujet, htmlBody: html });
+}
+
+// ------------------------------------------------------------
+// Email notification gérant
+// ------------------------------------------------------------
+function envoyerNotificationGerant(data, dateFormatee) {
+  var sujet = 'Nouvelle réservation — ' + data.prenom + ' ' + data.nom + ' · ' + dateFormatee;
+  var allergieLigne = data.allergie ? '<tr><td style="padding:5px 0;color:#8B7355;font-size:13px;width:40%;">Allergies</td><td style="padding:5px 0;font-size:13px;">' + data.allergie + '</td></tr>' : '';
+  var messageLigne = data.message ? '<tr><td style="padding:5px 0;color:#8B7355;font-size:13px;">Message</td><td style="padding:5px 0;font-size:13px;">' + data.message + '</td></tr>' : '';
+  var html = '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f0f0f0;font-family:Arial,sans-serif;"><div style="max-width:480px;margin:32px auto;background:#fff;border-radius:4px;overflow:hidden;border:1px solid #ddd;"><div style="background:#8B1A1A;padding:20px 24px;"><p style="margin:0;font-size:11px;color:#F5F0E8;letter-spacing:0.1em;text-transform:uppercase;">Crêperie Burgonde — Nouvelle réservation</p></div><div style="padding:24px;"><table style="width:100%;border-collapse:collapse;"><tr><td style="padding:5px 0;color:#8B7355;font-size:13px;width:40%;">Client</td><td style="padding:5px 0;font-size:13px;font-weight:bold;">' + data.prenom + ' ' + data.nom + '</td></tr><tr><td style="padding:5px 0;color:#8B7355;font-size:13px;">Email</td><td style="padding:5px 0;font-size:13px;"><a href="mailto:' + data.email + '" style="color:#8B1A1A;">' + data.email + '</a></td></tr><tr><td style="padding:5px 0;color:#8B7355;font-size:13px;">Téléphone</td><td style="padding:5px 0;font-size:13px;">' + data.tel + '</td></tr><tr><td style="padding:5px 0;color:#8B7355;font-size:13px;">Date</td><td style="padding:5px 0;font-size:13px;font-weight:bold;">' + dateFormatee + '</td></tr><tr><td style="padding:5px 0;color:#8B7355;font-size:13px;">Heure</td><td style="padding:5px 0;font-size:13px;font-weight:bold;">' + data.heure + '</td></tr><tr><td style="padding:5px 0;color:#8B7355;font-size:13px;">Couverts</td><td style="padding:5px 0;font-size:13px;font-weight:bold;">' + data.couverts + '</td></tr>' + allergieLigne + messageLigne + '<tr><td style="padding:5px 0;color:#8B7355;font-size:13px;">Soumis le</td><td style="padding:5px 0;font-size:12px;color:#999;">' + data.soumis_le + '</td></tr></table></div><div style="background:#f9f9f9;padding:14px 24px;border-top:1px solid #eee;"><p style="margin:0;font-size:11px;color:#999;">Réservation enregistrée dans votre Google Sheet.</p></div></div></body></html>';
+  MailApp.sendEmail({ to: EMAIL_GERANT, subject: sujet, htmlBody: html });
+}
+
+// ------------------------------------------------------------
+// Test
+// ------------------------------------------------------------
+function testerEmail() {
+  var dataTest = {
+    prenom: 'Marie', nom: 'Test', email: EMAIL_GERANT, tel: '06 00 00 00 00',
+    date: '2026-10-19', heure: '12h00', couverts: '2 personnes',
+    allergie: '', message: 'Test', soumis_le: new Date().toLocaleString('fr-FR')
+  };
+  envoyerConfirmationClient(dataTest, 'lundi 19 octobre 2026');
+  envoyerNotificationGerant(dataTest, 'lundi 19 octobre 2026');
+}
