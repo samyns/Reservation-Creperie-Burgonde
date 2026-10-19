@@ -50,7 +50,6 @@
     .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
     .error-msg { margin-top: 1rem; padding: 12px; border-radius: 3px; font-size: 13px; text-align: center; background: #F0D4D4; color: #6E1414; border: 0.5px solid #D4A0A0; display: none; }
     .hint-msg { margin-top: 0.5rem; font-size: 11px; color: #8B7355; font-style: italic; display: none; text-align: center; }
-    /* Séparateur de service dans le select */
     .service-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #C8A84B; padding: 8px 0 4px; display: block; }
     .centered-page { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 4rem 2rem; text-align: center; background: #F5F0E8; }
     .centered-page.visible { display: flex; }
@@ -125,6 +124,8 @@
             <option value="13">13 personnes</option>
             <option value="14">14 personnes</option>
             <option value="15">15 personnes</option>
+            <option value="16">16 personnes</option>
+            <option value="17">17 personnes</option>
           </select>
         </div>
         <div class="form-group">
@@ -173,8 +174,8 @@
 </div>
 
 <script>
-  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxij_8VNK12RpHiFPCxfKGt-JvPfHxfO_3ro9SE-JLWoRh_UTWs06OOP0mDg58xWOk/exec';
-  var MAX_COUVERTS = 15;
+  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgrYYHYGwSJd7NwgJURbPwIsVpbYSjs_8i2XmrwBnjSnMJKXPGun5G8Sbrr1O6IBY/exec';
+  var MAX_COUVERTS = 17;
 
   document.getElementById('date').setAttribute('min', new Date().toISOString().split('T')[0]);
 
@@ -213,28 +214,29 @@
       var auMoinsUnDispo = false;
 
       json.slots.forEach(function(slot) {
-        // Séparateur visuel entre midi et soir
         if (slot.service !== dernierService) {
           var label = slot.service === 'midi' ? '— Déjeuner —' : '— Dîner —';
           html += '<option disabled>' + label + '</option>';
           dernierService = slot.service;
         }
 
-        var complet = slot.bloque || slot.pris + nbCouverts > MAX_COUVERTS;
+        var plafond = (typeof slot.max === "number") ? slot.max : MAX_COUVERTS;
+        var complet = slot.bloque || slot.pris + nbCouverts > plafond;
+
         if (!complet) tousComplets = false;
         if (!complet) auMoinsUnDispo = true;
 
-        var restants = MAX_COUVERTS - slot.pris;
+        var restants = plafond - slot.pris;
 
         if (slot.bloque) {
           html += '<option value="" disabled>' + slot.heure + ' — indisponible</option>';
         } else if (complet) {
           html += '<option value="" disabled>' + slot.heure + ' — complet</option>';
         } else {
-          var label = restants <= 4
+          var labelText = restants <= 4
             ? slot.heure + ' (' + restants + ' place' + (restants > 1 ? 's' : '') + ' restante' + (restants > 1 ? 's' : '') + ')'
             : slot.heure;
-          html += '<option value="' + slot.heure + '">' + label + '</option>';
+          html += '<option value="' + slot.heure + '">' + labelText + '</option>';
         }
       });
 
